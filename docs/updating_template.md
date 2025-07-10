@@ -1,20 +1,22 @@
-# Updating the project from the upstream template
+# Updating the project from the upstream template (generic workflow)
 
-This repository (`diploma-devops`) periodically synchronises with the public template repository [`cct-devops-diploma-2025-template`](https://github.com/estebangarcia/cct-devops-diploma-2025-template) on the **class-2** branch.  Follow the steps below each time you want to bring the latest template changes into your own code‑base.
+This repository (`diploma-devops`) periodically synchronises with the public template [`cct-devops-diploma-2025-template`](https://github.com/estebangarcia/cct-devops-diploma-2025-template). The instructions below work for **any future template branch** (e.g., `class‑4`, `class‑5`, …) while still ensuring that **only your commits** appear in history.
+
+Replace **`<CLASS_BRANCH>`** with the branch you are importing each time (`class-4`, `class-5`, etc.). A single environment variable (`BRANCH`) keeps the commands copy‑paste friendly.
 
 ---
 
-## 0  One‑time set‑up (already done)
+## 0  One‑time remote (already done on each workstation)
 
 ```bash
-# Add the template repo as a secondary remote
+# Run once per machine
 git remote add template \
   https://github.com/estebangarcia/cct-devops-diploma-2025-template.git
 ```
 
 ---
 
-## 1  Fetch the latest template history
+## 1  Fetch the template
 
 ```bash
 git fetch template
@@ -22,96 +24,106 @@ git fetch template
 
 ---
 
-## 2  Create a throw‑away update branch
+## 2  Create a throw‑away branch tracking the desired template branch
 
 ```bash
-# Name includes the date so multiple syncs stay unique
-BR=template-class-2-$(date +%Y%m%d)
+# Define the template branch you want to import
+BRANCH=class-4          # ← change to class‑5, class‑6, … next time
 
-git checkout -b "$BR" template/class-2
+# Unique local branch name keeps multiple syncs distinct
+BR=template-${BRANCH}-$(date +%Y%m%d)
+
+git checkout -b "$BR" template/$BRANCH
 ```
 
 ---
 
-## 3  Merge the template into **main**
-
-### 3.1 If this is the **first** merge (no common ancestor)
+## 3  Squash‑merge into **main** (keeps history clean)
 
 ```bash
 git checkout main
-git pull --ff-only origin main
+git pull --ff-only origin main   # ensure local main is current
 
-git merge --allow-unrelated-histories --no-ff "$BR" \
-  -m "Merge template/class-2 $(date +%Y-%m-%d)"
+git merge --squash --allow-unrelated-histories "$BR"   # stage all template changes
 ```
 
-### 3.2 For **subsequent** merges
+### 3.1  If conflicts appear
 
 ```bash
-git checkout main
-git pull --ff-only origin main
-
-git merge --no-ff "$BR" \
-  -m "Sync template/class-2 $(date +%Y-%m-%d)"
-```
-
----
-
-## 4  Resolve conflicts by **taking the template version wholesale**
-
-```bash
-# Accept the incoming (template) side for every conflicted file
+# Accept the template version for every conflicted file
 git checkout --theirs -- .
 
-git add .               # stages the conflict resolutions
-git commit --no-edit    # completes the merge commit
+git add .               # stage resolutions
 ```
 
-> **GUI alternative** – launch `code .`, open the **Source Control** view, and click **Accept Incoming** for each file under *MERGE CHANGES*.
-
----
-
-## 5  Refresh your environment & run tests
+Now record a single commit authored by you:
 
 ```bash
-# Activate your virtual‑env first
-source .venv/bin/activate           # or `poetry shell`, `pipenv shell`, …
-
-pip install -r requirements.txt      # install new/updated packages
-
-pytest -q                            # all tests should pass
+git commit -m "Sync template/$BRANCH $(date +%Y-%m-%d)"
 ```
 
 ---
 
-## 6  Push and tag the sync point
+## 4  Refresh environment & test
+
+```bash
+source .venv/bin/activate           # or poetry/pipenv shell
+pip install -r requirements.txt     # pulls any new dependencies
+pytest -q                           # all tests should pass
+```
+
+---
+
+## 5  Push & tag
 
 ```bash
 git push origin main
 
 git tag template-sync-$(date +%Y-%m-%d)
-
 git push origin --tags
 ```
 
 ---
 
-## 7  Clean up the temporary branch
+## 6  Clean up the throw‑away branch
 
 ```bash
-git branch -d "$BR"   # safe to delete locally – can recreate any time
+git branch -d "$BR"      # delete local temp branch
 ```
 
 ---
 
-### Notes
+### Quick reference (copy‑paste)
 
-* **Compiled artefacts** (`*.pyc`, `__pycache__/`) are ignored via `.gitignore`. If any slip through, run:
+```bash
+# 1  Fetch
+git fetch template
 
-  ```bash
-  git ls-files -z -- '*.py[cod]' | xargs -0 git rm --cached --
-  git commit -m "Remove Python byte‑code files"
-  ```
-* Continuous Integration is configured in `.github/workflows/test.yml` and will run automatically on every push, ensuring the template update hasn’t broken your build.
+# 2  Prepare variables
+BRANCH=class-4                # adjust each release
+auto_branch="template-${BRANCH}-$(date +%Y%m%d)"
 
-Happy syncing! \:rocket:
+git checkout -b "$auto_branch" template/$BRANCH
+
+# 3  Squash‑merge
+git checkout main
+git pull --ff-only origin main
+git merge --squash --allow-unrelated-histories "$auto_branch"
+
+# Resolve conflicts wholesale
+git checkout --theirs -- . && git add .
+
+git commit -m "Sync template/$BRANCH $(date +%Y-%m-%d)"
+
+# 4  Install deps & test
+source .venv/bin/activate && pip install -r requirements.txt && pytest -q
+
+# 5  Push & tag
+git push origin main && \
+  git tag template-sync-$(date +%Y-%m-%d) && git push origin --tags
+
+# 6  Clean up
+git branch -d "$auto_branch"
+```
+
+> **Tip:** If you frequently sync, consider wrapping the quick reference in a shell script (e.g., `scripts/sync_template.sh BRANCH`) so the only argument you supply is the new class branch.
