@@ -27,6 +27,3 @@ You should now be able to start the server
 ```bash
 $ python manage.py runserver
 ```
-
---
-test
