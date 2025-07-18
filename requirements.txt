@@ -1,5 +1,4 @@
 asgiref==3.8.1
-backports-datetime-fromisoformat==2.0.3
 Django==5.2.3
 django-extensions==4.1
 django-filter==25.1
