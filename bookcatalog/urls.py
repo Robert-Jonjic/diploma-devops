@@ -20,6 +20,6 @@ from django.contrib import admin
 
 urlpatterns = [
     path("", RedirectView.as_view(pattern_name="health-list", permanent=False)),
-    path("api/", include("api.urls")),
+    path("api/", include(("api.urls", "api"), namespace="api")),
     path("admin/", admin.site.urls),
 ]
