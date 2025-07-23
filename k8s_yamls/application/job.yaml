@@ -1,0 +1,29 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: django-migrate
+  namespace: books-catalog
+spec:
+  template:
+    spec:
+      containers:
+      - image: ghcr.io/robert-jonjic/devops-diploma-2025:main
+        name: api
+        command: ["python", "manage.py", "migrate"]
+        env:
+          - name: DATABASE_NAME
+            value: books
+          - name: DATABASE_USER
+            value: books
+          - name: DATABASE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: app-secret
+                key: DATABASE_PASSWORD
+          - name: DATABASE_HOST
+            value: postgres-0.postgres.postgres.svc.cluster.local
+          - name: DEVELOPMENT_MODE
+            value: "false"
+      restartPolicy: Never
+      imagePullSecrets:
+      - name: ghcr-token
