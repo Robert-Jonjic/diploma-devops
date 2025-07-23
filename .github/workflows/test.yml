@@ -35,8 +35,10 @@ jobs:
   # ───────────────────────────── docker build & push ────────────────────────
   build-docker-image:
     runs-on: ubuntu-latest
-    needs: [ test, runmigrations, migrations-check ]
-    if: github.ref == 'refs/heads/main'          # only from main
+    needs: [test, runmigrations, migrations-check]
+    # only trigger on direct pushes to main
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
     permissions:
       contents: read
       packages: write
@@ -45,37 +47,37 @@ jobs:
 
     env:
       REGISTRY: ghcr.io
-      IMAGE_NAME: devops-diploma-2025           # repo part after the owner
+      IMAGE_NAME: devops-diploma-2025
 
     steps:
       - uses: actions/checkout@v4
 
-      # -- derive a lower-case owner name (GHCR requirement) -----------------
-      - name: Set IMAGE_OWNER env (lowercase)
-        run: |
-          echo "IMAGE_OWNER=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV"
+      # ── derive lower‑case owner and expose as output ─────────────
+      - name: Derive image owner
+        id: prep
+        run: echo "image_owner=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
 
-      # -- login to your GHCR namespace --------------------------------------
+      # ── login ────────────────────────────────────────────────────
       - name: Login to GHCR
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
-          username: ${{ env.IMAGE_OWNER }}
-          password: ${{ secrets.GHCR_PAT }}        # PAT with write:packages
+          username: ${{ steps.prep.outputs.image_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      # -- optional OCI labels ----------------------------------------------
+      # ── OCI labels ───────────────────────────────────────────────
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ steps.prep.outputs.image_owner }}/${{ env.IMAGE_NAME }}
 
-      # -- build & push ------------------------------------------------------
+      # ── build & push ─────────────────────────────────────────────
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
+            ${{ env.REGISTRY }}/${{ steps.prep.outputs.image_owner }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
           labels: ${{ steps.meta.outputs.labels }}
