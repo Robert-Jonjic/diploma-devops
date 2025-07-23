@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: books-catalog
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      service: books-catalog
+  template:
+    metadata:
+      labels:
+        service: books-catalog
+    spec:
+      containers:
+      - image: ghcr.io/robert-jonjic/devops-diploma-2025:main
+        name: api 
+      imagePullSecrets:
+      - name: ghcr-token
