@@ -1,9 +1,9 @@
 name: Run the unit tests & publish Docker image
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   # ───────────────────────────────────────── tests ──────────────────────────
