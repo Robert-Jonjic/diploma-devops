@@ -3,7 +3,7 @@ replicaCount: 1
 
 # This sets the container image
 image:
-  repository: ghcr.io/robert-jonjic/devops-diploma-2025:main #replace with your image name
+  repository: ghcr.io/robert-jonjic/devops-diploma-2025 #replace with your image name
   # This sets the pull policy for images.
   pullPolicy: Always
   # Overrides the image tag to deploy
