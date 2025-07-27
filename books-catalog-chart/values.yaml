@@ -10,7 +10,8 @@ image:
   tag: "main"
 
 # This will be used to configure the Deployment so it can pull the image
-imagePullSecrets: []
+imagePullSecrets:
+  - name: ghcr-token
 
 ingress:
   annotations:
