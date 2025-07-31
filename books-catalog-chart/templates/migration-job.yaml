@@ -25,5 +25,5 @@ spec:
             - name: DATABASE_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.loadSecretFrom }}
+                  name: {{ .Values.loadSecretsFrom }}
                   key: password
