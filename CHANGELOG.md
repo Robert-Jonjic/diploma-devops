@@ -1,3 +1,10 @@
+## [1.1.0](https://github.com/Robert-Jonjic/diploma-devops/compare/v1.0.0...v1.1.0) (2025-08-01)
+
+### Features
+
+* Workflow Update ([c12e8d2](https://github.com/Robert-Jonjic/diploma-devops/commit/c12e8d234cbe45c410b44f6d8ffd51eead54bee0))
+* Workflow Update Image Version in values.yaml ([d6c1cf5](https://github.com/Robert-Jonjic/diploma-devops/commit/d6c1cf57f5cdae515455c1a524e5aaf9f69899de))
+
 ## 1.0.0 (2025-07-31)
 
 ### Features
