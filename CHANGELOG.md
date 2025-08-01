@@ -1,3 +1,9 @@
+## [1.1.1](https://github.com/Robert-Jonjic/diploma-devops/compare/v1.1.0...v1.1.1) (2025-08-01)
+
+### Bug Fixes
+
+* Workflow Update ([47a6035](https://github.com/Robert-Jonjic/diploma-devops/commit/47a603579c320498f2109580a5197bbe9b739824))
+
 ## [1.1.0](https://github.com/Robert-Jonjic/diploma-devops/compare/v1.0.0...v1.1.0) (2025-08-01)
 
 ### Features
